@@ -6,5 +6,5 @@ This is a program for automatically generating github wiki pages from a C# code 
 
 ```
 Usage:
-"Wiki Page Generator.exe" [DESTINATION DIRECTORY] [CS Script File 1] [CS Script File 2] [CS Script File 2] [etc...]
+"Wiki Page Generator.exe" [REPO-NAME] [DESTINATION DIRECTORY] [CS Script File 1] [CS Script File 2] [CS Script File 2] [etc...]
 ```
