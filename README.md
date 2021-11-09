@@ -2,7 +2,7 @@
 
 This is a program for automatically generating github wiki pages from a C# code file.
 
-**Requires dot net 5.0 to be installed for it to work**
+**Requires the .NET Runtime 5.0 to be installed to work: (Download Here)[https://dotnet.microsoft.com/download/dotnet/5.0]**
 
 ```
 Usage:
