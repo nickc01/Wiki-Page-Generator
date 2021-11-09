@@ -22,9 +22,9 @@ namespace Wiki_Page_Generator
 
 		const string WIKI_TABLE_ELEMENT = @"| *LEFT* | *RIGHT* |";
 
-		const string LINKED_WIKI_TABLE_ELEMENT = @"| [*LINK_NAME*](https://github.com/Darpaler/Escape-Room-AR/wiki/*FILENAME*) | *RIGHT* |";
+		const string LINKED_WIKI_TABLE_ELEMENT = @"| [*LINK_NAME*](*WIKI_PAGE**FILENAME*) | *RIGHT* |";
 
-		const string PAGE_LINK = @"https://github.com/Darpaler/Escape-Room-AR/wiki/";
+		//const string PAGE_LINK = @"*WIKI_PAGE*";
 
 
 		const string WIKI_METHOD_PARAM_HEADER = @"| Parameters | Description |
@@ -41,7 +41,7 @@ namespace Wiki_Page_Generator
 ## Description:
 *FUNCTION_COMMENT*
 
-Part of class [*CLASS_NAME*](https://github.com/Darpaler/Escape-Room-AR/wiki/*CLASS_FILE_NAME*)
+Part of class [*CLASS_NAME*](*WIKI_PAGE**CLASS_FILE_NAME*)
 
 ";
 
@@ -51,17 +51,42 @@ Part of class [*CLASS_NAME*](https://github.com/Darpaler/Escape-Room-AR/wiki/*CL
 		static ConcurrentDictionary<string, List<string>> totalPages = new ConcurrentDictionary<string, List<string>>();
 
 		/// <summary>
+		/// The link to the repository online
+		/// </summary>
+		static string repoLink;
+
+		/// <summary>
 		/// Main part of the program.
 		/// USAGE:
-		/// "Wiki Page Generator.exe" [DESTINATION DIRECTORY] [CS Script File 1] [CS Script File 2] [CS Script File 2] [etc...]
+		/// "Wiki Page Generator.exe" [REPO NAME] [DESTINATION DIRECTORY] [CS Script File 1] [CS Script File 2] [CS Script File 2] [etc...]
 		/// </summary>
 		static void Main(string[] args)
 		{
+			if (args.GetLength(0) == 0)
+			{
+				Console.WriteLine("ERROR : NO ARGUMENTS PASSED");
+				return;
+			}
+
+			if (args.GetLength(0) == 1)
+			{
+				Console.WriteLine("ERROR : NO DESTINATION DIRECTORY SPECIFIED");
+				return;
+			}
+
+			if (args.GetLength(0) == 2)
+			{
+				Console.WriteLine("ERROR : NO CS FILES SPECIFIED");
+				return;
+			}
 			var watch = Stopwatch.StartNew();
 			totalPages.Clear();
-			var dumpLocation = new DirectoryInfo(args[0]);
 
-			Parallel.For(1, args.Length, i =>
+			repoLink = $"https://github.com/nickc01/{args[0]}/wiki/";
+
+			var dumpLocation = new DirectoryInfo(args[1]);
+
+			Parallel.For(2, args.Length, i =>
 			{
 				var extraction = ExtractAllInfo(args[i]);
 
@@ -115,6 +140,7 @@ Part of class [*CLASS_NAME*](https://github.com/Darpaler/Escape-Room-AR/wiki/*CL
 				builder.Replace("*FUNCTION_SIGNATURE*", largestMethod.MethodHeader);
 				builder.Replace("*FUNCTION_COMMENT*", comments.Comment);
 				builder.Replace("*CLASS_NAME*", info.Class.ClassName);
+				builder.Replace("*WIKI_PAGE*", repoLink);
 				builder.Replace("*CLASS_FILE_NAME*", info.Class.ClassName + "-(Script)");
 
 				if (comments.parameterComments.Count > 0)
@@ -129,7 +155,7 @@ Part of class [*CLASS_NAME*](https://github.com/Darpaler/Escape-Room-AR/wiki/*CL
 				}
 				File.WriteAllText(outputDir.FullName + "\\" + info.Class.ClassName + "-" + largestMethod.MethodName + "-(Method).md", builder.ToString());
 
-				addedPagesList.Add($"Page : {PAGE_LINK}{info.Class.ClassName}-{largestMethod.MethodName}-(Method)");
+				addedPagesList.Add($"Page : {repoLink}{info.Class.ClassName}-{largestMethod.MethodName}-(Method)");
 			}
 		}
 
@@ -213,6 +239,7 @@ Part of class [*CLASS_NAME*](https://github.com/Darpaler/Escape-Room-AR/wiki/*CL
 					builder.Append(LINKED_WIKI_TABLE_ELEMENT);
 					builder.Replace("*LINK_NAME*", largestMethod.ReturnType + " " + largestMethod.MethodName + "()");
 					builder.Replace("*FILENAME*", info.Class.ClassName + "-" + largestMethod.MethodName + "-(Method)");
+					builder.Replace("*WIKI_PAGE*", repoLink);
 					builder.Replace("*RIGHT*", largestMethod.PruneComments().Comment);
 					builder.Append("\r\n");
 				}
@@ -247,6 +274,7 @@ Part of class [*CLASS_NAME*](https://github.com/Darpaler/Escape-Room-AR/wiki/*CL
 					builder.Append(LINKED_WIKI_TABLE_ELEMENT);
 					builder.Replace("*LINK_NAME*", largestMethod.ReturnType + " " + largestMethod.MethodName + "()");
 					builder.Replace("*FILENAME*", info.Class.ClassName + "-" + largestMethod.MethodName + "-(Method)");
+					builder.Replace("*WIKI_PAGE*", repoLink);
 					builder.Replace("*RIGHT*", largestMethod.PruneComments().Comment);
 					builder.Append("\r\n");
 				}
@@ -254,7 +282,7 @@ Part of class [*CLASS_NAME*](https://github.com/Darpaler/Escape-Room-AR/wiki/*CL
 
 			File.WriteAllText(outputDir.FullName + "\\" + info.Class.ClassName + "-(Script).md", builder.ToString());
 
-			addedPagesList.Add($"Page : {PAGE_LINK}{info.Class.ClassName}-(Script)");
+			addedPagesList.Add($"Page : {repoLink}{info.Class.ClassName}-(Script)");
 		}
 
 		/// <summary>
