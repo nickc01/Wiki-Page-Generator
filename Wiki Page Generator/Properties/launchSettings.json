@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Wiki Page Generator": {
+      "commandName": "Project",
+      "commandLineArgs": "\"C:\\Unity Projects\\Escape-Room-AR-Wiki\\Wiki  Page 2\\Escape-Room-AR.wiki\" \"C:\\Unity Projects\\Escape-Room-AR\\Escapre Room AR\\Assets\\Scripts\\LocalProfileInfo.cs\""
+    }
+  }
+}
