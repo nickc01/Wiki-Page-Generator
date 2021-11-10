@@ -24,8 +24,6 @@ namespace Wiki_Page_Generator
 
 		const string LINKED_WIKI_TABLE_ELEMENT = @"| [*LINK_NAME*](*WIKI_PAGE**FILENAME*) | *RIGHT* |";
 
-		//const string PAGE_LINK = @"*WIKI_PAGE*";
-
 
 		const string WIKI_METHOD_PARAM_HEADER = @"| Parameters | Description |
 | --- | --- |
@@ -92,7 +90,14 @@ Part of class [*CLASS_NAME*](*WIKI_PAGE**CLASS_FILE_NAME*)
 
 				List<string> addedPages = new List<string>();
 
-				CreateClassWikiPage(dumpLocation, extraction, addedPages);
+				if (extraction.Class != null)
+				{
+					CreateClassWikiPage(dumpLocation, extraction, addedPages);
+				}
+				else
+				{
+					CreateEnumWikiPage(dumpLocation, extraction, addedPages);
+				}
 
 				CreatePagesForMethods(dumpLocation, extraction, addedPages);
 
@@ -160,7 +165,43 @@ Part of class [*CLASS_NAME*](*WIKI_PAGE**CLASS_FILE_NAME*)
 		}
 
 		/// <summary>
-		/// Creates pages for all the extracted methods of a class
+		/// Creates a page for the extracted enum
+		/// </summary>
+		/// <param name="outputDir">The output directory the files will be placed in</param>
+		/// <param name="info">The info that has been extracted from the CS file</param>
+		/// <param name="addedPagesList">A list of all the pages that have been added. This method will add to this list when it adds its own page</param>
+		static void CreateEnumWikiPage(DirectoryInfo outputDir, AllExtractedInfo info, List<string> addedPagesList)
+		{
+			var builder = new StringBuilder(WIKI_HEADER);
+
+			builder.Replace("*TYPE_DESCRIPTION*", info.Enum.PruneComments().Comment);
+			builder.Append("\r\n\r\n");
+
+			var enumFields = EnumFieldExtraction.Extract(info.Enum);
+
+			if (enumFields.Count > 0)
+			{
+				builder.Append(WIKI_TABLE_HEADER);
+				builder.Replace("*LEFT*", "Enum Values");
+				builder.Replace("*RIGHT*", "Description");
+				builder.Append("\r\n");
+
+				foreach (var field in enumFields)
+				{
+					builder.Append(WIKI_TABLE_ELEMENT);
+					builder.Replace("*LEFT*", field.ValueName);
+					builder.Replace("*RIGHT*", field.PruneComments().Comment);
+					builder.Append("\r\n");
+				}
+			}
+
+			File.WriteAllText(outputDir.FullName + "\\" + info.Enum.EnumName + "-(Script).md", builder.ToString());
+
+			addedPagesList.Add($"Page : {repoLink}{info.Enum.EnumName}-(Script)");
+		}
+
+		/// <summary>
+		/// Creates a page for the extracted class
 		/// </summary>
 		/// <param name="outputDir">The output directory the files will be placed in</param>
 		/// <param name="info">The info that has been extracted from the CS file</param>
@@ -300,15 +341,35 @@ Part of class [*CLASS_NAME*](*WIKI_PAGE**CLASS_FILE_NAME*)
 			var fields = FieldExtraction.Extract(fileContents);
 
 			var mostCommonIndentation = FindMostCommonIndent(methods);
-			fields.RemoveAll(f => f.Indentation != mostCommonIndentation);
+			if (mostCommonIndentation != null)
+			{
+				fields.RemoveAll(f => f.Indentation != mostCommonIndentation);
+			}
 
-			var classInfo = ClassExtraction.Extract(fileContents, file.Name.Replace(file.Extension, ""));
+			var classInfo = ClassExtraction.Extract(fileContents, file.Name.Replace(file.Extension, ""),out var foundClass);
+
+			EnumExtraction enumInfo = null;
+
+			if (!foundClass)
+			{
+				enumInfo = EnumExtraction.Extract(fileContents, file.Name.Replace(file.Extension, ""), out var foundEnum);
+
+				if (!foundEnum)
+				{
+					enumInfo = null;
+				}
+				else
+				{
+					classInfo = null;
+				}
+			}
 
 			return new AllExtractedInfo
 			{
 				Fields = fields,
 				Methods = methods,
-				Class = classInfo
+				Class = classInfo,
+				Enum = enumInfo
 			};
 		}
 

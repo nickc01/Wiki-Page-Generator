@@ -18,7 +18,7 @@ namespace Wiki_Page_Generator
 		/// <summary>
 		/// Pattern for detecting xml commented field definitions
 		/// </summary>
-		static readonly Regex XMLPattern = new Regex(@"([ \t]*?)(\/\/\/\s+?<summary>(?:\s*?\/\/\/.+?[\r\n]+?)*)\s*?((?:public\s|private\s|protected\s|static\s|event\s|virtual\s|sealed\s|readonly\s|\b)*)\b\s*?([\w\d]+?(?:<.+?>)?(?:\[.*?\])?)\s([\d\w]+?)(?:;|\s?{|\s?\=\>)", RegexOptions.Compiled);
+		static readonly Regex XMLPattern = new Regex(@"([ \t]*?)(\/\/\/\s+?<summary>(?:\s*?\/\/\/.+?[\r\n]+?)*)\s*?((?:public\s|private\s|protected\s|static\s|event\s|virtual\s|sealed\s|readonly\s|\b)*)\b\s*?([\w\d]+?(?:<.+?>)?(?:\[.*?\])?)\s([\d\w]+?)(?:;|\s?{|\s?\=\>?)", RegexOptions.Compiled);
 
 		/// <summary>
 		/// Pattern for detecting tooltip commented field definitions (this specifically handles the case where the [Tooltip] attribute is defined before the [SerializedField] attribute)

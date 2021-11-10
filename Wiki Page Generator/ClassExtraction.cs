@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 
 namespace Wiki_Page_Generator
 {
+
 	/// <summary>
 	/// Represents a class that has been extracted from a CS file
 	/// </summary>
@@ -11,12 +12,12 @@ namespace Wiki_Page_Generator
 		/// <summary>
 		/// Pattern for detecting xml commented class definitions
 		/// </summary>
-		static readonly Regex XMLCommentsPattern = new Regex(@"([ \t]*?)(\/\/\/\s*<[\S\s]*?\/.+?>[\r\n]*)\s*?(?:\[.*?\][\r\n]*?\s*?)*(((?:public\s|private\s|protected\s|static\s|event\s|virtual\s|sealed\s|readonly\s|abstract\s|\b)*)(?:class|struct)\s*([\w\d]+?(?:<.+?>)?.+?)[\r\n\s].+?[\r\n])", RegexOptions.Compiled);
+		static readonly Regex XMLCommentsPattern = new Regex(@"([ \t]*?)(\/\/\/\s*<[\S\s]*?\/.+?>[\r\n]*)\s*?(?:\[.*?\][\r\n]*?\s*?)*(((?:public\s|private\s|protected\s|static\s|event\s|virtual\s|sealed\s|readonly\s|abstract\s|\b)*)(?:class|struct)\s*([\w\d]+?(?:<.+?>)?[\w\d]*?\b))", RegexOptions.Compiled);
 
 		/// <summary>
 		/// Pattern for detecting regular commented class definitions
 		/// </summary>
-		static readonly Regex RegularCommentsPattern = new Regex(@"(?<!\/)(?:\/{2})+(?!\/)(.+?)[\r\n](((?:public\s|private\s|protected\s|static\s|event\s|virtual\s|sealed\s|readonly|abstract\s\s|\b)*)(?:class|struct)\s*([\w\d]+?(?:<.+?>)?.+?)[\r\n\s].+?[\r\n])", RegexOptions.Compiled);
+		static readonly Regex RegularCommentsPattern = new Regex(@"(?<!\/)(?:\/{2})+(?!\/)(.+?)[\r\n]\s*?(((?:public\s|private\s|protected\s|static\s|event\s|virtual\s|sealed\s|readonly|abstract\s\s|\b)*)(?:class|struct)\s*([\w\d]+?(?:<.+?>)?.+?\b))", RegexOptions.Compiled);
 
 		/// <summary>
 		/// The header of the class (eg. "public static class TESTCLASS {")
@@ -31,14 +32,15 @@ namespace Wiki_Page_Generator
 		/// <summary>
 		/// Attempts to extract a class from the input file text. Returns null if it cannot be found
 		/// </summary>
-		public static ClassExtraction Extract(string fileContents, string className)
+		public static ClassExtraction Extract(string fileContents, string className, out bool found)
 		{
+			found = true;
 			var extraction = TestMatches(XMLCommentsPattern.Matches(fileContents), className, m => new ClassExtraction
 			{
 				CommentStuff = m.Groups[2].Value,
 				CommentType = CommentType.XMLComments,
 				ClassHeader = m.Groups[3].Value,
-				ClassName = m.Groups[5].Value
+				ClassName = m.Groups[5].Value,
 			});
 			if (extraction != null)
 			{
@@ -50,7 +52,7 @@ namespace Wiki_Page_Generator
 				CommentStuff = m.Groups[1].Value,
 				CommentType = CommentType.RegularComments,
 				ClassHeader = m.Groups[2].Value,
-				ClassName = m.Groups[4].Value
+				ClassName = m.Groups[4].Value,
 			});
 			if (extraction != null)
 			{
@@ -58,12 +60,13 @@ namespace Wiki_Page_Generator
 			}
 			else
 			{
+				found = false;
 				return new ClassExtraction
 				{
 					ClassHeader = "public class " + className,
 					CommentStuff = "",
 					CommentType = CommentType.NoComments,
-					ClassName = className
+					ClassName = className,
 				};
 			}
 		}
