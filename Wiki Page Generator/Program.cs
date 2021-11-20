@@ -53,38 +53,51 @@ Part of class [*CLASS_NAME*](*WIKI_PAGE**CLASS_FILE_NAME*)
 		/// </summary>
 		static string repoLink;
 
+		static void PrintCommandError(string msg)
+		{
+			Console.WriteLine(msg);
+			Console.WriteLine();
+			Console.WriteLine("USAGE: [USERNAME OF REPO OWNER] [REPO-NAME] [DESTINATION DIRECTORY] [CS Script File 1] [CS Script File 2] [CS Script File 2] [etc...]");
+		}
+
 		/// <summary>
 		/// Main part of the program.
 		/// USAGE:
-		/// "Wiki Page Generator.exe" [REPO NAME] [DESTINATION DIRECTORY] [CS Script File 1] [CS Script File 2] [CS Script File 2] [etc...]
+		/// "Wiki Page Generator.exe" [USERNAME OF REPO OWNER] [REPO NAME] [DESTINATION DIRECTORY] [CS Script File 1] [CS Script File 2] [CS Script File 2] [etc...]
 		/// </summary>
 		static void Main(string[] args)
 		{
 			if (args.GetLength(0) == 0)
 			{
-				Console.WriteLine("ERROR : NO ARGUMENTS PASSED");
+				PrintCommandError("ERROR : NO ARGUMENTS PASSED");
 				return;
 			}
 
 			if (args.GetLength(0) == 1)
 			{
-				Console.WriteLine("ERROR : NO DESTINATION DIRECTORY SPECIFIED");
+				PrintCommandError("ERROR : NO REPO NAME ENTERED");
 				return;
 			}
 
 			if (args.GetLength(0) == 2)
 			{
-				Console.WriteLine("ERROR : NO CS FILES SPECIFIED");
+				PrintCommandError("ERROR : NO DESTINATION DIRECTORY SPECIFIED");
+				return;
+			}
+
+			if (args.GetLength(0) == 3)
+			{
+				PrintCommandError("ERROR : NO CS FILES SPECIFIED");
 				return;
 			}
 			var watch = Stopwatch.StartNew();
 			totalPages.Clear();
 
-			repoLink = $"https://github.com/nickc01/{args[0]}/wiki/";
+			repoLink = $"https://github.com/{args[0]}/{args[1]}/wiki/";
 
-			var dumpLocation = new DirectoryInfo(args[1]);
+			var dumpLocation = new DirectoryInfo(args[2]);
 
-			Parallel.For(2, args.Length, i =>
+			Parallel.For(3, args.Length, i =>
 			{
 				var extraction = ExtractAllInfo(args[i]);
 
@@ -158,7 +171,8 @@ Part of class [*CLASS_NAME*](*WIKI_PAGE**CLASS_FILE_NAME*)
 						builder.Replace("*RIGHT*",param.Value);
 					}
 				}
-				File.WriteAllText(outputDir.FullName + "\\" + info.Class.ClassName + "-" + largestMethod.MethodName + "-(Method).md", builder.ToString());
+
+				File.WriteAllText(outputDir.FullName + Path.DirectorySeparatorChar + info.Class.ClassName + "-" + largestMethod.MethodName + "-(Method).md", builder.ToString());
 
 				addedPagesList.Add($"Page : {repoLink}{info.Class.ClassName}-{largestMethod.MethodName}-(Method)");
 			}
@@ -195,7 +209,7 @@ Part of class [*CLASS_NAME*](*WIKI_PAGE**CLASS_FILE_NAME*)
 				}
 			}
 
-			File.WriteAllText(outputDir.FullName + "\\" + info.Enum.EnumName + "-(Script).md", builder.ToString());
+			File.WriteAllText(outputDir.FullName + Path.DirectorySeparatorChar + info.Enum.EnumName + "-(Script).md", builder.ToString());
 
 			addedPagesList.Add($"Page : {repoLink}{info.Enum.EnumName}-(Script)");
 		}
@@ -321,7 +335,7 @@ Part of class [*CLASS_NAME*](*WIKI_PAGE**CLASS_FILE_NAME*)
 				}
 			}
 
-			File.WriteAllText(outputDir.FullName + "\\" + info.Class.ClassName + "-(Script).md", builder.ToString());
+			File.WriteAllText(outputDir.FullName + Path.DirectorySeparatorChar + info.Class.ClassName + "-(Script).md", builder.ToString());
 
 			addedPagesList.Add($"Page : {repoLink}{info.Class.ClassName}-(Script)");
 		}

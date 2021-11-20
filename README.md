@@ -8,5 +8,5 @@ For Other Platforms: [Download Here](https://dotnet.microsoft.com/download/dotne
 
 ```
 Usage:
-"Wiki Page Generator.exe" [REPO-NAME] [DESTINATION DIRECTORY] [CS Script File 1] [CS Script File 2] [CS Script File 2] [etc...]
+"Wiki Page Generator.exe" [USERNAME OF REPO OWNER] [REPO-NAME] [DESTINATION DIRECTORY] [CS Script File 1] [CS Script File 2] [CS Script File 2] [etc...]
 ```
